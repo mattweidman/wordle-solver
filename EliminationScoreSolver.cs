@@ -42,19 +42,91 @@ namespace WordleSolver
                 }
             }
 
-            return new EliminationData(containingCounts, inPositionCounts);
+            return new EliminationData(words.Count, containingCounts, inPositionCounts);
+        }
+
+        /// <summary>
+        /// Expected number of words eliminated by a character.
+        /// </summary>
+        /// <param name="c">Character in word.</param>
+        /// <param name="pos">Position in word.</param>
+        /// <param name="eliminationData">Pre-computed data.</param>
+        /// <param name="wasAlreadySeen">Whether c was already seen in the current word.</param>
+        public static double GetEliminationsScoreOfChar(
+            char c, int pos, EliminationData eliminationData, bool wasAlreadySeen)
+        {
+            int greenScore = eliminationData.wordCount -
+                eliminationData.GetNumberOfWordsWithLetterInPosition(c, pos);
+            int greenWeight = eliminationData.GetNumberOfWordsWithLetterInPosition(c, pos);
+
+            if (wasAlreadySeen)
+            {
+                return (greenScore * greenWeight) / (double) eliminationData.wordCount;
+            }
+
+            int yellowScore = (eliminationData.wordCount -
+                eliminationData.GetNumberOfWordsContaining(c)) +
+                eliminationData.GetNumberOfWordsWithLetterInPosition(c, pos);
+            int yellowWeight = eliminationData.GetNumberOfWordsContaining(c) - greenWeight;
+            
+            int grayScore = eliminationData.GetNumberOfWordsContaining(c);
+            int grayWeight = eliminationData.wordCount - yellowWeight - greenWeight;
+
+            return (greenScore * greenWeight + yellowScore * yellowWeight + grayScore * grayWeight)
+                / (double)eliminationData.wordCount;
+        }
+
+        /// <summary>
+        /// Expected number of words eliminated by a word.
+        /// </summary>
+        /// <param name="word">Word guess.</param>
+        /// <param name="eliminationData">Pre-computed data.</param>
+        public static double GetEliminationScoreOfWord(
+            string word, EliminationData eliminationData)
+        {
+            HashSet<char> charsSeenSoFar = new HashSet<char>();
+            double score = 0;
+            for (int i = 0; i < word.Length; i++)
+            {
+                char c = word[i];
+                score += GetEliminationsScoreOfChar(
+                    c, i, eliminationData, charsSeenSoFar.Contains(c));
+                charsSeenSoFar.Add(c);
+            }
+
+            return score / word.Length;
+        }
+
+        /// <summary>
+        /// Compoute the top-scoring words in a set of possible words.
+        /// </summary>
+        /// <param name="words">Set of all possible words.</param>
+        /// <param name="numWords">Number of words to return.</param>
+        /// <returns>List of tuples (s, x), where s is a word, and x is the word's score.</returns>
+        public static ImmutableList<(string, double)> GetTopScoringWords(
+            IImmutableSet<string> words, int numWords)
+        {
+            EliminationData eliminationData = ComputeEliminationData(words);
+            return words
+                .Select(word => (word, GetEliminationScoreOfWord(word, eliminationData)))
+                .OrderByDescending(pair => pair.Item2)
+                .Take(numWords)
+                .ToImmutableList();
         }
 
         public class EliminationData
         {
+            public readonly int wordCount;
+
             /// <summary>Number of words containing each letter.</summary>
             private readonly int[] containingCounts;
 
             /// <summary>Number of words with a letter in a particular position.</summary>
             private readonly int[,] inPositionCounts;
 
-            public EliminationData(int[] containingCounts, int[,] inPositionCounts)
+            public EliminationData(int wordCount, int[] containingCounts, int[,] inPositionCounts)
             {
+                this.wordCount = wordCount;
                 this.containingCounts = containingCounts;
                 this.inPositionCounts = inPositionCounts;
             }
@@ -67,6 +139,16 @@ namespace WordleSolver
             public int[,] GetInPositionCounts()
             {
                 return (int[,])this.inPositionCounts.Clone();
+            }
+
+            public int GetNumberOfWordsContaining(char c)
+            {
+                return this.containingCounts[c - 'a'];
+            }
+
+            public int GetNumberOfWordsWithLetterInPosition(char c, int pos)
+            {
+                return this.inPositionCounts[c - 'a', pos];
             }
 
             /// <summary>Human-readable summary string.</summary>
