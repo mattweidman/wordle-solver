@@ -98,7 +98,7 @@ namespace WordleSolver
         }
 
         /// <summary>
-        /// Compoute the top-scoring words in a set of possible words.
+        /// Compute the top-scoring words in a set of possible words.
         /// </summary>
         /// <param name="words">Set of all possible words.</param>
         /// <param name="numWords">Number of words to return.</param>

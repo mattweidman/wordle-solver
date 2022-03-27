@@ -46,6 +46,20 @@ namespace WordleSolver
             return new GuessResult(guess, letterColors);
         }
 
+        /// <summary>Compute from a string of "g", "y", and "r', which indicate green,
+        /// yellow, and gray spaces.</summary>
+        public static GuessResult FromString(string guess, string resultStr)
+        {
+            Dictionary<char, LetterColor> colorMap = new Dictionary<char, LetterColor>()
+            {
+                {'g', LetterColor.GREEN},
+                {'y', LetterColor.YELLOW},
+                {'r', LetterColor.GRAY},
+            };
+
+            return new GuessResult(guess, resultStr.Select(c => colorMap[c]));
+        }
+
         /// <summary>
         /// Whether a guess is still possible after this guess result is shown.
         /// </summary>
@@ -88,6 +102,11 @@ namespace WordleSolver
             }
 
             return true;
+        }
+
+        public bool UserWon()
+        {
+            return this.letterColors.All(color => color == LetterColor.GREEN);
         }
 
         public enum LetterColor
