@@ -6,11 +6,13 @@ namespace WordleSolver
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("Loading list of words.");
             WordsCollection wordsCollection = WordsCollection.Initialize();
 
-            Console.WriteLine("Computing the best starting Wordle word.");
-            string bestWord = BruteForceSingleStepSolver.BestGuess(wordsCollection.allWords);
-            Console.WriteLine(bestWord);
+            Console.WriteLine("Pre-computing.");
+            EliminationScoreSolver.EliminationData eliminationData =
+                EliminationScoreSolver.ComputeEliminationData(wordsCollection.allWords);
+            Console.WriteLine(eliminationData.GetSummary());
         }
     }
 }
