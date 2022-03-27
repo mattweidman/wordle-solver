@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Immutable;
 
 namespace WordleSolver
@@ -11,11 +12,17 @@ namespace WordleSolver
         {
             int lowestScore = possibleWords.Count;
             string bestWord = "";
+            int guessesSoFar = 0;
             foreach (string guess in possibleWords)
             {
+                guessesSoFar++;
+                Console.WriteLine($"Guess {guessesSoFar}: {guess}");
                 int numberRemaining = 0;
+                int solutionsSoFar = 0;
                 foreach (string solution in possibleWords)
                 {
+                    solutionsSoFar++;
+                    Console.WriteLine($"\tSolution {solutionsSoFar}: {solution}");
                     GuessResult result = GuessResult.FromGuessAndSolution(guess, solution);
                     foreach (string word in possibleWords)
                     {
