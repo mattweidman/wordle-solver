@@ -15,3 +15,7 @@ where the char doesn't appear twice should be eliminated.
 * Choose words that avoid "trapping" the user in a situation where there are a lot of green letters but still a lot of possible words.
     * Example word: nares. If you start with "soare", you will quickly get the last 4 letters, but there are over a dozen words that end with "ares". It takes 11 tries to get to "nares" because there we can only get info from one letter at a time.
 * Create a simmulation framework to evaluate the performance of different algorithms.
+
+## How to run
+
+Download code and run `dotnet run`.
