@@ -93,8 +93,14 @@ namespace WordleSolver
                 }
                 else
                 {
-                    if (other.Where((c, i) => this.letterColors[i] != LetterColor.GREEN)
-                        .Contains(this.guess[i]))
+                    if (other[i] == this.guess[i])
+                    {
+                        return false;
+                    }
+
+                    // Reject if the letter in the previous guess is gray, there is no other
+                    // indication that the letter exists elsewhere, and the letter exists in other.
+                    if (!this.hasNonGrayChar(this.guess[i]) && other.Contains(this.guess[i]))
                     {
                         return false;
                     }
@@ -102,6 +108,19 @@ namespace WordleSolver
             }
 
             return true;
+        }
+
+        private bool hasNonGrayChar(char c)
+        {
+            for (int j = 0; j < this.guess.Length; j++)
+            {
+                if (this.guess[j] == c && this.letterColors[j] != LetterColor.GRAY)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public bool UserWon()
