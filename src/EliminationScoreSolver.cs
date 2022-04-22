@@ -102,12 +102,18 @@ namespace WordleSolver
         /// </summary>
         /// <param name="words">Set of all possible words.</param>
         /// <param name="numWords">Number of words to return.</param>
+        /// <param name="tryAllWords">If true, computes top-scoring words out of all words, not
+        /// just those that could win. If false, only looks at words that have not been eliminated.
+        /// </param>
         /// <returns>List of tuples (s, x), where s is a word, and x is the word's score.</returns>
         public static ImmutableList<(string, double)> GetTopScoringWords(
-            IImmutableSet<string> words, int numWords)
+            WordsCollection wordsCollection, int numWords, bool tryAllWords = false)
         {
-            EliminationData eliminationData = ComputeEliminationData(words);
-            return words
+            EliminationData eliminationData = ComputeEliminationData(wordsCollection.currentWords);
+            ISet<string> wordsToProcess = tryAllWords
+                ? (ISet<string>)wordsCollection.allWords
+                : (ISet<string>)wordsCollection.currentWords;
+            return wordsToProcess
                 .Select(word => (word, GetEliminationScoreOfWord(word, eliminationData)))
                 .OrderByDescending(pair => pair.Item2)
                 .Take(numWords)

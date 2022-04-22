@@ -8,13 +8,16 @@ namespace WordleSolver
     {
         private static readonly string WORDS_FILE_PATH = "words.txt";
 
-        private HashSet<string> wordsSet;
+        private HashSet<string> currentWordsMutable;
 
-        public IImmutableSet<string> allWords => wordsSet.ToImmutableHashSet();
+        public readonly IImmutableSet<string> allWords;
+
+        public IImmutableSet<string> currentWords => currentWordsMutable.ToImmutableHashSet();
 
         private WordsCollection(IEnumerable<string> allWords)
         {
-            this.wordsSet = allWords.ToHashSet();
+            this.allWords = allWords.ToImmutableHashSet();
+            this.currentWordsMutable = allWords.ToHashSet();
         }
 
         public static WordsCollection Initialize()
@@ -28,7 +31,8 @@ namespace WordleSolver
         /// </summary>
         public void EliminateWords(GuessResult result)
         {
-            this.wordsSet = this.wordsSet.Where(word => result.Accepts(word)).ToHashSet();
+            this.currentWordsMutable =
+                this.currentWordsMutable.Where(word => result.Accepts(word)).ToHashSet();
         }
     }
 }
