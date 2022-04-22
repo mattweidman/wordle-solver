@@ -34,5 +34,13 @@ namespace WordleSolver
             this.currentWordsMutable =
                 this.currentWordsMutable.Where(word => result.Accepts(word)).ToHashSet();
         }
+
+        /// <summary>
+        /// Whether the word is anywhere in the Wordle dictionary.
+        /// </summary>
+        public bool IsInDictionary(string word)
+        {
+            return this.allWords.Contains(word);
+        }
     }
 }

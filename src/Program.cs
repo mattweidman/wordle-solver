@@ -19,9 +19,14 @@ namespace WordleSolver
             {
                 if (args[0] == "simulate")
                 {
-                    if (args[1] == "eliminate")
+                    if (args[1] == "validonly")
                     {
-                        SimulateEliminate(args[2]);
+                        SimulateValidOnly(args[2]);
+                        return;
+                    }
+                    else if (args[1] == "maxeliminations")
+                    {
+                        SimulateMaximizeEliminations(args[2]);
                         return;
                     }
                 }
@@ -29,17 +34,23 @@ namespace WordleSolver
 
             Console.WriteLine("Invalid arguments. Valid commands:");
             Console.WriteLine("dotnet run");
-            Console.WriteLine("dotnet run simulate eliminate <word>");
+            Console.WriteLine("dotnet run simulate validonly <word>");
+            Console.WriteLine("dotnet run simulate maxeliminations <word>");
         }
 
         /// <summary>
-        /// Display the Wordle results if the top-scoring word is taken each turn, eliminating
-        /// invalid words each run so that invalid words are never played.
+        /// Display the Wordle results if the top-scoring valid word is taken each turn.
         /// </summary>
-        private static void SimulateEliminate(string solution)
+        private static void SimulateValidOnly(string solution)
         {
             Console.WriteLine("Loading list of words.");
             WordsCollection wordsCollection = WordsCollection.Initialize();
+
+            if (!wordsCollection.IsInDictionary(solution))
+            {
+                Console.WriteLine($"{solution} not found in the Wordle dictionary.");
+                return;
+            }
 
             int tries = 0;
             while (wordsCollection.currentWords.Count > 0)
@@ -54,6 +65,59 @@ namespace WordleSolver
                 {
                     break;
                 }
+
+                wordsCollection.EliminateWords(result);
+            }
+
+            Console.WriteLine($"Completed in {tries} tries.");
+        }
+
+        /// <summary>
+        /// Display the Wordle results if the top-scoring word, including invalid words, is chosen
+        /// each time until only one option remains.
+        /// </summary>
+        private static void SimulateMaximizeEliminations(string solution)
+        {
+            Console.WriteLine("Loading list of words.");
+            WordsCollection wordsCollection = WordsCollection.Initialize();
+
+            if (!wordsCollection.IsInDictionary(solution))
+            {
+                Console.WriteLine($"{solution} not found in the Wordle dictionary.");
+                return;
+            }
+
+            int tries = 0;
+            HashSet<string> wordsTried = new HashSet<string>();
+            while (wordsCollection.currentWords.Count > 0)
+            {
+                ImmutableList<(string, double)> validGuesses =
+                    EliminationScoreSolver.GetTopScoringWords(wordsCollection, 2, false);
+                ImmutableList<(string, double)> anyGuesses =
+                    EliminationScoreSolver.GetTopScoringWords(wordsCollection, 1, true);
+
+                String guess;
+                if (validGuesses.Count == 1
+                    || wordsTried.Contains(anyGuesses[0].Item1))
+                {
+                    Console.WriteLine("From validGuesses:");
+                    guess = validGuesses[0].Item1;
+                }
+                else
+                {
+                    Console.WriteLine("From anyGuesses:");
+                    guess = anyGuesses[0].Item1;
+                }
+                
+                GuessResult result = GuessResult.FromGuessAndSolution(guess, solution);
+                Console.WriteLine(result);
+
+                tries++;
+                if (result.UserWon())
+                {
+                    break;
+                }
+                wordsTried.Add(guess);
 
                 wordsCollection.EliminateWords(result);
             }
