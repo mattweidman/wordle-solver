@@ -61,6 +61,23 @@ namespace WordleSolver
         }
 
         /// <summary>
+        /// Written as "guess\tgyr" where "gyr" is the 5-letter combination of "g", "y", and "r"
+        /// that represent green, yellow, and gray spaces.
+        /// </summary>
+        public override string ToString()
+        {
+            Dictionary<LetterColor, char> colorMap = new Dictionary<LetterColor, char>()
+            {
+                {LetterColor.GREEN, 'g'},
+                {LetterColor.YELLOW, 'y'},
+                {LetterColor.GRAY, 'r'},
+            };
+
+            string gyr = string.Join("", this.letterColors.Select(color => colorMap[color]));
+            return $"{guess}\t{gyr}";
+        }
+
+        /// <summary>
         /// Whether a guess is still possible after this guess result is shown.
         /// </summary>
         public bool Accepts(string other)
