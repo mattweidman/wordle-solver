@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -35,12 +36,19 @@ namespace WordleSolver
                 this.currentWordsMutable.Where(word => result.Accepts(word)).ToHashSet();
         }
 
-        /// <summary>
-        /// Whether the word is anywhere in the Wordle dictionary.
-        /// </summary>
-        public bool IsInDictionary(string word)
+        public ImmutableHashSet<string> GetRandomSubset(int size)
         {
-            return this.allWords.Contains(word);
+            IImmutableList<string> allWordsList = this.allWords.ToImmutableList();
+            HashSet<string> subset = new HashSet<string>();
+
+            while (subset.Count < size)
+            {
+                Random rand = new Random();
+                int index = rand.Next(allWordsList.Count);
+                subset.Add(allWordsList[index]);
+            }
+
+            return subset.ToImmutableHashSet();
         }
     }
 }

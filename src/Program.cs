@@ -31,25 +31,35 @@ namespace WordleSolver
                     }
                 }
             }
+            else if (args.Length == 2)
+            {
+                if (args[0] == "simulate" && args[1] == "compare")
+                {
+                    SimulateCompare();
+                    return;
+                }
+            }
 
             Console.WriteLine("Invalid arguments. Valid commands:");
             Console.WriteLine("dotnet run");
             Console.WriteLine("dotnet run simulate validonly <word>");
             Console.WriteLine("dotnet run simulate maxeliminations <word>");
+            Console.WriteLine("dotnet run simulate compare");
         }
 
         /// <summary>
         /// Display the Wordle results if the top-scoring valid word is taken each turn.
         /// </summary>
-        private static void SimulateValidOnly(string solution)
+        /// <returns>The number of tries taken.</returns>
+        private static int SimulateValidOnly(string solution, bool shouldPrint = true)
         {
-            Console.WriteLine("Loading list of words.");
+            ConditionalPrint("Loading list of words.", shouldPrint);
             WordsCollection wordsCollection = WordsCollection.Initialize();
 
-            if (!wordsCollection.IsInDictionary(solution))
+            if (!wordsCollection.allWords.Contains(solution))
             {
-                Console.WriteLine($"{solution} not found in the Wordle dictionary.");
-                return;
+                ConditionalPrint($"{solution} not found in the Wordle dictionary.", shouldPrint);
+                return -1;
             }
 
             int tries = 0;
@@ -58,7 +68,7 @@ namespace WordleSolver
                 string guess =
                     EliminationScoreSolver.GetTopScoringWords(wordsCollection, 1, false)[0].Item1;
                 GuessResult result = GuessResult.FromGuessAndSolution(guess, solution);
-                Console.WriteLine(result);
+                ConditionalPrint(result.ToString(), shouldPrint);
 
                 tries++;
                 if (result.UserWon())
@@ -69,22 +79,24 @@ namespace WordleSolver
                 wordsCollection.EliminateWords(result);
             }
 
-            Console.WriteLine($"Completed in {tries} tries.");
+            ConditionalPrint($"Completed in {tries} tries.", shouldPrint);
+            return tries;
         }
 
         /// <summary>
         /// Display the Wordle results if the top-scoring word, including invalid words, is chosen
         /// each time until only one option remains.
         /// </summary>
-        private static void SimulateMaximizeEliminations(string solution)
+        /// <returns>The number of tries taken.</returns>
+        private static int SimulateMaximizeEliminations(string solution, bool shouldPrint = true)
         {
-            Console.WriteLine("Loading list of words.");
+            ConditionalPrint("Loading list of words.", shouldPrint);
             WordsCollection wordsCollection = WordsCollection.Initialize();
 
-            if (!wordsCollection.IsInDictionary(solution))
+            if (!wordsCollection.allWords.Contains(solution))
             {
-                Console.WriteLine($"{solution} not found in the Wordle dictionary.");
-                return;
+                ConditionalPrint($"{solution} not found in the Wordle dictionary.", shouldPrint);
+                return -1;
             }
 
             int tries = 0;
@@ -100,17 +112,15 @@ namespace WordleSolver
                 if (validGuesses.Count == 1
                     || wordsTried.Contains(anyGuesses[0].Item1))
                 {
-                    Console.WriteLine("From validGuesses:");
                     guess = validGuesses[0].Item1;
                 }
                 else
                 {
-                    Console.WriteLine("From anyGuesses:");
                     guess = anyGuesses[0].Item1;
                 }
                 
                 GuessResult result = GuessResult.FromGuessAndSolution(guess, solution);
-                Console.WriteLine(result);
+                ConditionalPrint(result.ToString(), shouldPrint);
 
                 tries++;
                 if (result.UserWon())
@@ -122,7 +132,48 @@ namespace WordleSolver
                 wordsCollection.EliminateWords(result);
             }
 
-            Console.WriteLine($"Completed in {tries} tries.");
+            ConditionalPrint($"Completed in {tries} tries.", shouldPrint);
+            return tries;
+        }
+
+        /// <summary>
+        /// Compare valid-only and max-eliminations algorithms across all words.
+        /// </summary>
+        private static void SimulateCompare()
+        {
+            Console.WriteLine("Loading list of words.");
+            WordsCollection wordsCollection = WordsCollection.Initialize();
+            ImmutableHashSet<string> wordsSubset = wordsCollection.GetRandomSubset(500);
+
+            int validOnlyScoreSum = 0;
+            int validOnlyFailCount = 0;
+            int maxEliminationsScoreSum = 0;
+            int maxEliminationsFailCount = 0;
+            int wordsSoFar = 0;
+            int wordCount = wordsSubset.Count;
+
+            Console.WriteLine("word\tvalid-only score\tmax-eliminations score\tprogress");
+            foreach (string solution in wordsSubset)
+            {
+                int validOnlyScore = SimulateValidOnly(solution, false);
+                validOnlyScoreSum += validOnlyScore;
+                validOnlyFailCount += validOnlyScore > 6 ? 1 : 0;
+
+                int maxEliminationsScore = SimulateMaximizeEliminations(solution, false);
+                maxEliminationsScoreSum += maxEliminationsScore;
+                maxEliminationsFailCount += maxEliminationsScore > 6 ? 1 : 0;
+
+                wordsSoFar++;
+
+                Console.WriteLine($"{solution}\t{validOnlyScore}\t{maxEliminationsScore}\t{wordsSoFar}/{wordCount}");
+            }
+
+            Console.WriteLine($"Valid only strategy:");
+            Console.WriteLine($"\tAverage score: {(double)validOnlyScoreSum / wordCount}");
+            Console.WriteLine($"\tNumber of failures (> 6 tries): {(double)validOnlyFailCount}/{wordCount}");
+            Console.WriteLine($"Max eliminations strategy:");
+            Console.WriteLine($"\tAverage score: {(double)maxEliminationsScoreSum / wordCount}");
+            Console.WriteLine($"\tNumber of failures (> 6 tries): {(double)maxEliminationsFailCount}/{wordCount}");
         }
 
         private static void RunInteractive() {
@@ -172,6 +223,14 @@ namespace WordleSolver
             {
                 (string, double) pair = topWords[i];
                 Console.WriteLine($"{i + 1}\t{pair.Item1}\t{pair.Item2}");
+            }
+        }
+
+        private static void ConditionalPrint(String message, bool shouldPrint)
+        {
+            if (shouldPrint)
+            {
+                Console.WriteLine(message);
             }
         }
     }
