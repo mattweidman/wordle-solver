@@ -8,12 +8,32 @@ namespace WordleSolver
     {
         private static readonly int WORDS_TO_SHOW = 10;
 
+        private static readonly string WORDLE_FILE = "words.txt";
+
+        private static readonly string BIRDLE_FILE = "birds.txt";
+
         public static void Main(string[] args)
         {
             if (args.Length == 0)
             {
-                RunInteractive();
+                RunInteractive(WORDLE_FILE);
                 return;
+            }
+            else if (args.Length == 1)
+            {
+                if (args[0] == "bird")
+                {
+                    RunInteractive(BIRDLE_FILE);
+                    return;
+                }
+            }
+            else if (args.Length == 2)
+            {
+                if (args[0] == "simulate" && args[1] == "compare")
+                {
+                    SimulateCompare();
+                    return;
+                }
             }
             else if (args.Length == 3)
             {
@@ -31,17 +51,10 @@ namespace WordleSolver
                     }
                 }
             }
-            else if (args.Length == 2)
-            {
-                if (args[0] == "simulate" && args[1] == "compare")
-                {
-                    SimulateCompare();
-                    return;
-                }
-            }
 
             Console.WriteLine("Invalid arguments. Valid commands:");
             Console.WriteLine("dotnet run");
+            Console.WriteLine("dotnet run bird");
             Console.WriteLine("dotnet run simulate validonly <word>");
             Console.WriteLine("dotnet run simulate maxeliminations <word>");
             Console.WriteLine("dotnet run simulate compare");
@@ -54,7 +67,7 @@ namespace WordleSolver
         private static int SimulateValidOnly(string solution, bool shouldPrint = true)
         {
             ConditionalPrint("Loading list of words.", shouldPrint);
-            WordsCollection wordsCollection = WordsCollection.Initialize();
+            WordsCollection wordsCollection = WordsCollection.Initialize(WORDLE_FILE);
 
             if (!wordsCollection.allWords.Contains(solution))
             {
@@ -91,7 +104,7 @@ namespace WordleSolver
         private static int SimulateMaximizeEliminations(string solution, bool shouldPrint = true)
         {
             ConditionalPrint("Loading list of words.", shouldPrint);
-            WordsCollection wordsCollection = WordsCollection.Initialize();
+            WordsCollection wordsCollection = WordsCollection.Initialize(WORDLE_FILE);
 
             if (!wordsCollection.allWords.Contains(solution))
             {
@@ -142,7 +155,7 @@ namespace WordleSolver
         private static void SimulateCompare()
         {
             Console.WriteLine("Loading list of words.");
-            WordsCollection wordsCollection = WordsCollection.Initialize();
+            WordsCollection wordsCollection = WordsCollection.Initialize(WORDLE_FILE);
             ImmutableHashSet<string> wordsSubset = wordsCollection.GetRandomSubset(500);
 
             int validOnlyScoreSum = 0;
@@ -176,9 +189,9 @@ namespace WordleSolver
             Console.WriteLine($"\tNumber of failures (> 6 tries): {(double)maxEliminationsFailCount}/{wordCount}");
         }
 
-        private static void RunInteractive() {
+        private static void RunInteractive(string filePath) {
             Console.WriteLine("Loading list of words.");
-            WordsCollection wordsCollection = WordsCollection.Initialize();
+            WordsCollection wordsCollection = WordsCollection.Initialize(filePath);
             
             int tries = 0;
             while (true)

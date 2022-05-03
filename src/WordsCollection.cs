@@ -7,7 +7,7 @@ namespace WordleSolver
 {
     public class WordsCollection
     {
-        private static readonly string WORDS_FILE_PATH = "words.txt";
+        private string filePath;
 
         private HashSet<string> currentWordsMutable;
 
@@ -21,9 +21,9 @@ namespace WordleSolver
             this.currentWordsMutable = allWords.ToHashSet();
         }
 
-        public static WordsCollection Initialize()
+        public static WordsCollection Initialize(string filePath)
         {
-            string[] lines = System.IO.File.ReadAllLines(WORDS_FILE_PATH);
+            string[] lines = System.IO.File.ReadAllLines(filePath);
             return new WordsCollection(lines);
         }
 
