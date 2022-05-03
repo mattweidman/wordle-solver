@@ -34,6 +34,16 @@ namespace WordleSolver
                     SimulateCompare();
                     return;
                 }
+                else if (args[0] == "best")
+                {
+                    BestOrWorst(WORDLE_FILE, Int32.Parse(args[1]), false);
+                    return;
+                }
+                else if (args[0] == "worst")
+                {
+                    BestOrWorst(WORDLE_FILE, Int32.Parse(args[1]), true);
+                    return;
+                }
             }
             else if (args.Length == 3)
             {
@@ -50,14 +60,50 @@ namespace WordleSolver
                         return;
                     }
                 }
+                else if (args[0] == "bird")
+                {
+                    if (args[1] == "best")
+                    {
+                        BestOrWorst(BIRDLE_FILE, Int32.Parse(args[2]), false);
+                        return;
+                    }
+                    else if (args[1] == "worst")
+                    {
+                        BestOrWorst(BIRDLE_FILE, Int32.Parse(args[2]), true);
+                        return;
+                    }
+                }
             }
 
             Console.WriteLine("Invalid arguments. Valid commands:");
             Console.WriteLine("dotnet run");
-            Console.WriteLine("dotnet run bird");
+            Console.WriteLine("dotnet run best <number>");
+            Console.WriteLine("dotnet run worst <number>");
             Console.WriteLine("dotnet run simulate validonly <word>");
             Console.WriteLine("dotnet run simulate maxeliminations <word>");
             Console.WriteLine("dotnet run simulate compare");
+            Console.WriteLine("dotnet run bird");
+            Console.WriteLine("dotnet run bird best <number>");
+            Console.WriteLine("dotnet run bird worst <number>");
+        }
+
+        /// <summary>
+        /// Display best or worst Wordle results.
+        /// </summary>
+        /// <param name="filePath">File path of list of words.</param>
+        /// <param name="displayCount">Number of words to show.</param>
+        /// <param name="showWorst">If true, shows the worst-scoring words instead of the best.
+        /// </para>
+        private static void BestOrWorst(string filePath, int displayCount, bool showWorst)
+        {
+            Console.WriteLine("Loading list of words.");
+            WordsCollection wordsCollection = WordsCollection.Initialize(filePath);
+            string superlative = showWorst ? "lowest-scoring" : "highest-scoring";
+            Console.WriteLine($"Computing the {superlative} starter words.");
+            ImmutableList<(string, double)> topWordsOfAll =
+                EliminationScoreSolver.GetTopScoringWords(
+                    wordsCollection, displayCount, true, showWorst);
+            displayTopWords(topWordsOfAll);
         }
 
         /// <summary>
@@ -189,6 +235,7 @@ namespace WordleSolver
             Console.WriteLine($"\tNumber of failures (> 6 tries): {(double)maxEliminationsFailCount}/{wordCount}");
         }
 
+        /// <param name="filePath">File path of list of words.</param>
         private static void RunInteractive(string filePath) {
             Console.WriteLine("Loading list of words.");
             WordsCollection wordsCollection = WordsCollection.Initialize(filePath);
