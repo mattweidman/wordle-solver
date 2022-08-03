@@ -7,8 +7,6 @@ namespace WordleSolver
 {
     public class WordsCollection
     {
-        private string filePath;
-
         private HashSet<string> currentWordsMutable;
 
         public readonly IImmutableSet<string> allWords;
