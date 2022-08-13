@@ -18,4 +18,9 @@ where the char doesn't appear twice should be eliminated.
 
 ## How to run
 
-Download code and run `dotnet run`.
+1. From the root directory, run `dotnet build`.
+2. Run the executable file in src/bin/Debug/net5.0.
+
+PC: `.\src\bin\Debug\net5.0\wordle-solver.exe`
+
+Mac: `./src/bin/Debug/net5./wordle-solver`
