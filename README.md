@@ -7,17 +7,13 @@ Currently, this solver works by assigning each possible word an "elimination sco
 
 This is a greedy algorithm, so there are a few cases where guessing the best-scoring answer actually hurts your chances in the long run. An example word where this algorithm does poorly is "nares." Another example is "hater". See the TODOs. However, for most words, this algorithm does good enough.
 
-## TODOs
-
-* If there are duplicate letters, and one duplicate is green and one is yellow, then words
-where the char doesn't appear twice should be eliminated.
-    * Example word: esses. Guessing "yedes" should eliminate "puces" because the "e" appears twice.
-* Choose words that avoid "trapping" the user in a situation where there are a lot of green letters but still a lot of possible words.
-    * Example word: nares. If you start with "soare", you will quickly get the last 4 letters, but there are over a dozen words that end with "ares". It takes 11 tries to get to "nares" because there we can only get info from one letter at a time.
-* Create a simmulation framework to evaluate the performance of different algorithms.
-
 ## How to run
 
+Run: `dotnet run --project src`
+
+Run unit tests: `dotnet test`
+
+If you are running the script multiple times and don't want to wait to build each time, you can build once and run using the following steps:
 1. From the root directory, run `dotnet build`.
 2. Run the executable file in src/bin/Debug/net5.0.
 

@@ -87,8 +87,13 @@ namespace WordleSolver
                 throw new ArgumentException("String is not the right number of characters.");
             }
 
+            int[] guessCharCounts = new int[26];
+            int[] otherCharCounts = new int[26];
+            bool[] grayChars = new bool[26];
+
             for (int i = 0; i < other.Length; i++)
             {
+                // Eliminate letters that don't match in the exact same position.
                 if (this.letterColors[i] == LetterColor.GREEN)
                 {
                     if (this.guess[i] != other[i])
@@ -102,11 +107,6 @@ namespace WordleSolver
                     {
                         return false;
                     }
-
-                    if (!other.Contains(this.guess[i]))
-                    {
-                        return false;
-                    }
                 }
                 else
                 {
@@ -114,10 +114,42 @@ namespace WordleSolver
                     {
                         return false;
                     }
+                }
 
-                    // Reject if the letter in the previous guess is gray, there is no other
-                    // indication that the letter exists elsewhere, and the letter exists in other.
-                    if (!this.hasNonGrayChar(this.guess[i]) && other.Contains(this.guess[i]))
+                // Count the characters and record whether each character is gray anywhere.
+                int guessCharIndex = (int) (this.guess[i] - 'a');
+                if (this.letterColors[i] == LetterColor.GRAY)
+                {
+                    grayChars[guessCharIndex] = true;
+                }
+                else
+                {
+                    guessCharCounts[guessCharIndex]++;
+                }
+
+                int otherCharIndex = (int) (other[i] - 'a');
+                otherCharCounts[otherCharIndex]++;
+            }
+
+            // Eliminate words with the wrong number of characters.
+            for (int i = 0; i < other.Length; i++)
+            {
+                int charIndex = (int) (this.guess[i] - 'a');
+                
+                if (grayChars[charIndex])
+                {
+                    // If a character appears gray anywhere, guess and other must contain it
+                    // the exact same number of times.
+                    if (guessCharCounts[charIndex] != otherCharCounts[charIndex])
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    // If the character is not gray anywhere, other must contain the character
+                    // at least as many times as guess.
+                    if (guessCharCounts[charIndex] > otherCharCounts[charIndex])
                     {
                         return false;
                     }
@@ -125,19 +157,6 @@ namespace WordleSolver
             }
 
             return true;
-        }
-
-        private bool hasNonGrayChar(char c)
-        {
-            for (int j = 0; j < this.guess.Length; j++)
-            {
-                if (this.guess[j] == c && this.letterColors[j] != LetterColor.GRAY)
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         public bool UserWon()
