@@ -7,6 +7,11 @@ Currently, this solver works by assigning each possible word an "elimination sco
 
 This is a greedy algorithm, so there are a few cases where guessing the best-scoring answer actually hurts your chances in the long run. An example word where this algorithm does poorly is "nares." Another example is "hater". See the TODOs. However, for most words, this algorithm does good enough.
 
+## TODO
+
+* Don't give extra points to words that don't eliminate more words.
+  * Example: Guess "glade"; result "ggggr". Two options: "glady" or "glads". "slays" gives a score of 0.5, and "glady" gives a score of 0.2 even though they both eliminate the same number of words (1). Ideally we would want to play "glady" rather than "slays" because "glady" has a chance of being the actual answer.
+
 ## How to run
 
 Run: `dotnet run --project src`

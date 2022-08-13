@@ -252,8 +252,17 @@ namespace WordleSolver
                 displayTopWords(topWordsOfAll);
                 Console.WriteLine("Top words that have not been eliminated:");
                 displayTopWords(topWordsOfCurrent);
-                Console.WriteLine(
-                    $"There are {wordsCollection.currentWords.Count} possible words.");
+
+                int possibleWords = wordsCollection.currentWords.Count;
+                if (possibleWords == 1)
+                {
+                    Console.WriteLine("There is 1 possible word.");
+                }
+                else
+                {
+                    Console.WriteLine(
+                        $"There are {wordsCollection.currentWords.Count} possible words.");
+                }
 
                 Console.WriteLine("\nPlease play another word.");
                 Console.WriteLine("What word did you play?");
@@ -282,7 +291,8 @@ namespace WordleSolver
             for (int i = 0; i < topWords.Count; i++)
             {
                 (string, double) pair = topWords[i];
-                Console.WriteLine($"{i + 1}\t{pair.Item1}\t{pair.Item2}");
+                string scoreStr = string.Format("{0:0.000}", pair.Item2);
+                Console.WriteLine($"{i + 1}\t{pair.Item1}\t{scoreStr}");
             }
         }
 

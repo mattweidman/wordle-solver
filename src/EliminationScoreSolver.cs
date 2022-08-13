@@ -94,7 +94,7 @@ namespace WordleSolver
                 charsSeenSoFar.Add(c);
             }
 
-            return score / word.Length;
+            return score / word.Length / eliminationData.wordCount * 100;
         }
 
         /// <summary>
@@ -115,9 +115,23 @@ namespace WordleSolver
             bool returnWorst = false)
         {
             EliminationData eliminationData = ComputeEliminationData(wordsCollection.currentWords);
+
+            // If there are no words left, return an empty list.
+            if (eliminationData.wordCount < 1)
+            {
+                return ImmutableList<(string, double)>.Empty;
+            }
+
+            // If there is one word left, return only it.
+            if (eliminationData.wordCount == 1)
+            {
+                return wordsCollection.currentWords.Select(word => (word, 0d)).ToImmutableList();
+            }
+
             ISet<string> wordsToProcess = tryAllWords
                 ? (ISet<string>)wordsCollection.allWords
                 : (ISet<string>)wordsCollection.currentWords;
+            
             return wordsToProcess
                 .Select(word => (word, GetEliminationScoreOfWord(word, eliminationData)))
                 .OrderByDescending(pair => pair.Item2 * (returnWorst ? -1 : 1))
