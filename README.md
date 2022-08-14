@@ -24,4 +24,4 @@ If you are running the script multiple times and don't want to wait to build eac
 
 PC: `.\src\bin\Debug\net5.0\wordle-solver.exe`
 
-Mac: `./src/bin/Debug/net5./wordle-solver`
+Mac: `./src/bin/Debug/net5.0/osx.10.10-x64/wordle-solver`
